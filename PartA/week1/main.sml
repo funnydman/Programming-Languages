@@ -216,3 +216,18 @@ fun max2 (xs: int list) =
         SOME (max_nonempty xs)
       end
 
+(*
+Boolean operations:
+1) e1 andalso e2
+2) e1 orelse e2
+3) not e1
+
+Languages does not need andalso, orelse, not
+ex:
+if e1
+then e2
+else false
+
+is equivalent to (e1 andalso e2)
+*)
+
