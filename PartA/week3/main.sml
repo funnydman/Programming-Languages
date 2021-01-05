@@ -81,4 +81,51 @@ fun max_constant e =
 
 val m_const = max_constant res_exp
 
-(* Type Synonyms *)
+(* Creating new types *)
+
+(* type aname = t *)
+
+type card = suit * rank
+
+fun is_Queen_of_Spades(c : card) =
+  #1 c  = Spade andalso #2 c = Queen
+
+val c1 : card = (Diamond, Ace)
+val c2 : suit * rank = (Diamond, Ace)
+val c3 = (Diamond, Ace)
+
+
+(* Lists and Options are Datatypes *)
+fun inc_or_zero intoption =
+  case intoption of
+       NONE => 0
+     | SOME i => i +1
+
+
+fun sum_list xs =
+  case xs of
+       [] => 0
+     | x::xs' => x + sum_list xs'
+
+fun append (xs, ys) =
+  case xs of
+       [] => ys
+     | x::xs' => x :: append(xs', ys)
+
+
+(* Each of Pattern Matching / Truth About Functions *)
+fun sum_triple triple =
+  let val (x, y, z) = triple
+  in
+    x + y + z
+  end
+
+(* the same as above *)
+fun sum_triple1 (x, y, z) =
+  x + y + z
+
+
+fun full_name {first=x, middle=y, last=z} =
+  x ^ " " ^ y ^ " " ^ z
+
+
