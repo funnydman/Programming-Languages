@@ -66,7 +66,7 @@ fun eval e =
        Constant i => i
      | Negate e2 => ~ (eval e2)
      | Add(e1, e2) => (eval e1) + (eval e2)
-     | Multiply(e1, e2) => (eval e1) + (eval e2)
+     | Multiply(e1, e2) => (eval e1) * (eval e2)
 
 val example_ans = eval res_exp
 
@@ -127,5 +127,101 @@ fun sum_triple1 (x, y, z) =
 
 fun full_name {first=x, middle=y, last=z} =
   x ^ " " ^ y ^ " " ^ z
+
+
+(* fun zip3 list_triple = *)
+(*    case list_triple of *)
+(*    ([],[],[]) => [] *)
+(*   |(hd1:tl1, hd2:tl2, hd3:tl3) => (hd1,hd2,hd3) :: zip3 (tl1,tl2,tl3) *)
+(*   | _ => raise ListLengthMismatch *)
+
+(* fun unzip lst = *)
+(*    case lst of *)
+(*      [] => ([],[],[]) *)
+(*     |(a,b,c)::tl => let val (l1,l2,l3) = unzip tl *)
+(*                     in *)
+(*                        (a::l1, b::l2, c::l3) *)
+(*                     end *)
+
+
+fun nondecreasing xs = (* int list -> bool *)
+   case xs of
+      [] => true
+    | _::[] => true
+    | head::(neck::rest) => head <= neck andalso nondecreasing (neck::rest)
+
+(* datatype sign = Positive | Negative | Zero *)
+
+(* fun multsign (x1, x2) = (1* int * int -> sign *1) *)
+(*    let fun sgn x = if x = 0 then Zero else if x > 0 then Positive else Negative *)
+(*    in *)
+(*       case (sgn x, sgn y) of *)
+(*           (Positive, Positive) => Positive *)
+(*         | (Negative, Negative) => Positive *)
+(*         | (Zero, _)         => Zero *)
+(*         | (_, Zero)         => Zero *)
+(*         | _                 => Negative *)
+(*    end *)
+
+(* fun len xs = *)
+(*   case xs of *)
+(*        [] => 0 *)
+(*      | _::xs' -> 1 + len xs' *)
+
+
+
+fun eval2 (Constant i) = i
+  | eval2 (Negate e2) = ~ (eval2 e2)
+  | eval2 (Add(e1, e2)) = (eval2 e1) + (eval2 e2)
+  | eval2 (Multiply(e1, e2)) = (eval2 e1) * (eval2 e2)
+
+val res = eval2 res_exp
+
+exception MyUndesirableCondition
+
+fun mydiv (x, y) =
+  if y = 0
+  then raise MyUndesirableCondition
+  else x div y
+
+
+(* tail recursion *)
+
+(* fun fact n = *)
+(*   if n=0 *)
+(*   then 1 *)
+(*   else n * fact(n-1) *)
+
+(* val r = fact 3 *)
+
+
+fun fact n =
+  let fun aux(n, acc) =
+    if n=0
+    then acc
+    else aux(n-1, acc*n)
+  in
+    aux(n, 1)
+  end
+
+val x = fact 3
+
+(* Accumulators for Tail Recursion *)
+(* reverse a list *)
+fun rev xs =
+  case xs of
+       [] => []
+     | x::xs' => (rev xs) @ [x]
+
+
+fun reverse  xs =
+  let fun aux(xs, acc) =
+  case xs of
+       [] => acc
+     | x:: xs' => aux(xs', x::acc)
+  in
+    aux(xs, [])
+  end
+
 
 
