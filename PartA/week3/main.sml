@@ -128,21 +128,24 @@ fun sum_triple1 (x, y, z) =
 fun full_name {first=x, middle=y, last=z} =
   x ^ " " ^ y ^ " " ^ z
 
+exception ListLengthMismatch
 
-(* fun zip3 list_triple = *)
-(*    case list_triple of *)
-(*    ([],[],[]) => [] *)
-(*   |(hd1:tl1, hd2:tl2, hd3:tl3) => (hd1,hd2,hd3) :: zip3 (tl1,tl2,tl3) *)
-(*   | _ => raise ListLengthMismatch *)
+fun zip list_triple =
+  case list_triple of
+       ([], [], []) => [] |
+       (hd1::tl1, hd2::tl2, hd3::tl3) => (hd1, hd2, hd3)::zip(tl1, tl2, tl3) |
+       _ => raise ListLengthMismatch
 
-(* fun unzip lst = *)
-(*    case lst of *)
-(*      [] => ([],[],[]) *)
-(*     |(a,b,c)::tl => let val (l1,l2,l3) = unzip tl *)
-(*                     in *)
-(*                        (a::l1, b::l2, c::l3) *)
-(*                     end *)
+fun unzip lst =
+  case lst of
+       []=> ([], [], []) |
+       (a,b,c)::tl => let val (l1, l2, l3) = unzip tl
+                      in
+                        (a::l1, b::l2, c::l3)
+                      end
 
+val zipping = zip([1,2,3], [1, 2,3], [1,2,3])
+val unzipped = unzip zipping
 
 fun nondecreasing xs = (* int list -> bool *)
    case xs of
@@ -150,7 +153,7 @@ fun nondecreasing xs = (* int list -> bool *)
     | _::[] => true
     | head::(neck::rest) => head <= neck andalso nondecreasing (neck::rest)
 
-(* datatype sign = Positive | Negative | Zero *)
+datatype sign = Positive | Negative | Zero
 
 (* fun multsign (x1, x2) = (1* int * int -> sign *1) *)
 (*    let fun sgn x = if x = 0 then Zero else if x > 0 then Positive else Negative *)
@@ -163,12 +166,11 @@ fun nondecreasing xs = (* int list -> bool *)
 (*         | _                 => Negative *)
 (*    end *)
 
-(* fun len xs = *)
-(*   case xs of *)
-(*        [] => 0 *)
-(*      | _::xs' -> 1 + len xs' *)
 
-
+fun len xs =
+  case xs of
+       [] => 0
+     | _::xs' -> 1 + len xs'
 
 fun eval2 (Constant i) = i
   | eval2 (Negate e2) = ~ (eval2 e2)
@@ -223,5 +225,21 @@ fun reverse  xs =
     aux(xs, [])
   end
 
+type user = string * string
+type person = int * string
 
+datatype sometype = Person of person | User of user
 
+fun test(xs) =
+  case xs of
+     [] => [] |
+     x::xs' => (x+1) :: test(xs')
+
+val r = test([10,20,30,40])
+
+fun create_user (x) =
+  case x of
+       Person(i, s) => Person (i, s) |
+       User(s1, s2) => User (s1, s2)
+
+val dima = create_user (Person(22, "Dima"))
