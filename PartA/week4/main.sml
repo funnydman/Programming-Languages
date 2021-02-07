@@ -34,6 +34,12 @@ fun filter(f, xs) =
                  then x::(filter (f, xs'))
                  else filter(f, xs')
 
+fun zip xs ys =
+  case (xs, ys) of
+       ([], []) => [] |
+       (x::xs', y::ys') => (x, y)::(zip xs' ys') |
+       _ => raise Empty
+
 fun is_even v =
   (v mod 2 = 0)
 
@@ -41,11 +47,14 @@ val x1 = map((fn x => x+1), [4,8,12,16])
 val x2 = map(hd, [[1,2], [3,4]])
 val x3 = filter(is_even, [1,2,3,4,5])
 
+fun get_all_even_snd xs = filter((fn (_,v) => v mod 2 = 0), xs)
+
 fun greaterThanX x = fn y => y > x (* int -> (int -> bool) *)
 
 fun noNegative xs = filter(greaterThanX ~1, xs)
 
 fun allGreater (xs, n) = filter(fn x => x > n, xs)
+
 
 val test1 = greaterThanX(10)(15)
 
@@ -93,12 +102,50 @@ fun backup1 (f, g) = fn x => case f x of
 fun backup2 (f, g) = fn x => f x handle _ => g x
 
 
+(* Currying *)
 val sorted3 = fn x => fn y => fn z => z >= y andalso y >= x
 val t1 = sorted3 7 9 11
+val t2 = ((sorted3 7) 9) 11
 
 (* syntax sugar for version above *)
-fun sorted3 x y z = z >= y andalso y >= x
-val t1 = sorted3 7 9 11
+fun sorted3_nicer x y z = z >= y andalso y >= x
+val t1 = sorted3_nicer 7 9 11
+val t4 = ((sorted3_nicer 7) 9) 11 (* the same as above *)
 
-(* Currying *)
+(* Currying Wrapup *)
+fun curry f x y = f (x,y)
 
+fun uncurry f (x,y) = f x y (* uncurry foo *)
+
+fun other_curry f x y = f y x
+
+(* example *)
+fun range (i, j) = if i > j then [] else i::range(i+1, j)
+
+val countup = curry range 1
+val xs = countup 7
+
+
+(* examples *)
+fun sum x y = x + y
+
+val curried_sum = fn x => fn y => sum x y
+
+fun curried_sum x y = sum x y
+
+val add10 = curried_sum 10
+
+val res = add10 20
+
+(* refereces *)
+val x = ref 42
+val y = ref 42
+val z = x
+val _ = x := 43
+(* !y  - retrieve content *)
+val w = (!y) + (!z)
+
+(* Show functions in list module *)
+(* - structure X = List; *)
+(* structure X : LIST_2015? *)
+(* - signature X = LIST; *)
