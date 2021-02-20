@@ -1,5 +1,3 @@
-(* 14:10 *)
-
 (* Coursera Programming Languages, Homework 3, Provided Code *)
 
 exception NoAnswer
@@ -36,30 +34,27 @@ datatype typ = Anything
 	     | TupleT of typ list
 	     | Datatype of string
 
-(**** you can put all your code here ****)
-
+(* 1. *)
 fun only_capitals(xs) =
   List.filter(fn x => Char.isUpper(String.sub(x, 0))) xs
 
-(*Foldl-  val it = fn : ('a * 'b -> 'b) -> 'b -> 'a list -> 'b *)
+(* 2. *)
 fun longest_string1 xs =
   List.foldl(fn (x, init) => if String.size(x) > String.size(init) then x else init) "" xs
 
+(* 3. *)
 fun longest_string2 xs =
   List.foldr(fn (x, init) => if String.size(x) > String.size(init) then x else init) "" xs
 
-
 (* 4. *)
-fun comp (x: int, y: int) =
-  x > y
+fun longest_string_helper f strings =
+	List.foldl (fn (str, acc) => if f(String.size str, String.size acc) then str else acc)  "" strings
 
-(* fun longest_string_helper comp (xs, x) = *)
-(*   if comp(String.size(x), String.size(init)) then x else init *)
+val longest_string3 = longest_string_helper (fn (len1, len2) => len1 > len2)
 
+val longest_string4 = longest_string_helper (fn (len1, len2) => len1 >= len2)
 
-(* val longest_string3 = fn xs => foldl(longest_string_helper(fn (x, init) => *)
-(* f(String.size(x), String.size(init)))) "" xs *)
-
+(* 5. *)
 val h  = Char.isUpper o String.sub
 
 fun helper(x, y) =
@@ -67,7 +62,6 @@ fun helper(x, y) =
     if String.size(x) > String.size(y) then x else y
   else if h(x, 0) then x else y
 
-(* 5. *)
 fun longest_capitalized(xs) =
   List.foldl(fn (x, init) => helper(x, init)) " " xs
 
@@ -79,20 +73,66 @@ fun rev_string(x) =
     (String.implode o List.rev) l
   end
 
+(* 7. *)
+fun first_answer f xs =
+    case xs of
+         [] => raise NoAnswer |
+         x::xs' => if isSome(f x) then valOf(f x) else first_answer f xs'
 
-val test1 = only_capitals ["A","B","C"] = ["A","B","C"]
-val test2 = longest_string1 ["A","bc","C"] = "bc"
-val test3 = longest_string2 ["A","bc","C"] = "bc"
+(* 8. *)
+fun all_answers f xs =
+	let fun helper xs acc =
+			case xs of
+			   [] => SOME acc |
+			   x::xs => case f x of
+                NONE => NONE |
+                SOME ans => helper xs (acc @ ans)
+	in helper xs [] end
 
-(* val test4a = longest_string3 ["A","bc","C"] = "bc" *)
 
-(* val test4b = longest_string4 ["A","B","C"] = "C" *)
+(* 9. *)
+fun count_wildcards p =
+  g (fn () => 1) (fn _ => 0) p
 
-val test5 = longest_capitalized ["A","bc","C"] = "A"
-val test6 = rev_string "abc" = "cba"
+fun count_wild_and_variable_lengths p =
+  g (fn () => 1) (fn (x) => String.size(x)) p
 
-(* f("A", "") -> "A" *)
-(* f("bc", "A") -> "A" *)
-(* f("C", "A") -> "A" *)
-(* val f = helper *)
-(* val some = f("C", f("bc", f("A", " "))) *)
+fun count_some_var(v, p) =
+  g (fn _ => 0) (fn (x) => if x = v then 1 else 0) p
+
+
+(* 10. *)
+fun check_pat p =
+    let fun get_vars p=
+          case p of
+              Variable s => [s]
+            | TupleP ps => List.foldl (fn (p,vs) => get_vars p @ vs) [] ps
+            | ConstructorP(_,p) => get_vars p
+            | _ => []
+        fun unique xs =
+          case xs of
+              [] => true
+            | x::xs' => (not (List.exists (fn y => y=x) xs'))
+                        andalso unique xs'
+    in
+        unique (get_vars p)
+    end
+
+(* 11. *)
+fun match (v, p) =
+	case (v, p) of
+		(_, Wildcard)	 		 					 => SOME []
+	  | (_, Variable s)   		 					 => SOME [(s, v)]
+	  | (Unit, UnitP)        		 				 => SOME []
+	  | (Const c1, ConstP c)  	 		 			 => if c = c1 then SOME [] else NONE
+	  | (Tuple vs, TupleP ps)	         			 => if length vs = length ps
+							  			       			then all_answers match (ListPair.zip (vs, ps))
+											  			else NONE
+	  | (Constructor (s2, v), ConstructorP (s1, p1)) => if s1 = s2 then match (v, p1) else NONE
+	  | _ 					 						 => NONE
+
+(* 12. *)
+fun first_match v ps =
+	SOME (first_answer (fn p => match (v, p)) ps)
+	handle NoAnswer => NONE
+
